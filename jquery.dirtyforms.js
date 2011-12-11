@@ -51,7 +51,7 @@ if (typeof jQuery == 'undefined') throw("jQuery Required");
 
         elm.trigger('refreshValue');
 
-        if (elm.is('input[type=check],input[type=radio]')) {
+        if (elm.is('input[type=checkbox],input[type=radio]')) {
             elmValue = elm.attr('checked');
         }
         else {
@@ -61,7 +61,7 @@ if (typeof jQuery == 'undefined') throw("jQuery Required");
         return elmValue;
     };
 
-    var inputElements = 'input[type=hidden],input[type=text],input[type=password],input[type=check],input[type=radio],select,textarea';
+    var inputElements = 'input[type=hidden],input[type=text],input[type=password],input[type=checkbox],input[type=radio],select,textarea';
 
 
     $.fn.skipDirtyForm = function() 
