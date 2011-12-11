@@ -5,14 +5,14 @@ Usage
 To make all forms track "dirty state"
 
 ```javascript
- $("form") //select eather a form or directly select input elements in a form to only track indervidual field of a form
+ $("form") //select either a form or directly select input elements in a form to only track individual fields of a form
 	.dirtyForm()
 	.submit(function(){            
-		$(this).markClean();//when submitting a form we need to make it as clean so that for form can navigate away from the current page
+		$(this).markClean();//when submitting a form we need to mark it as clean so that the form can post away from the current page
             });
 ```
 
-Disable "dirty" checks for indervidual elements (cancel buttons / links)
+Disable "dirty" checks for individual elements (cancel buttons / links etc)
 
 ```javascript
 $('a#cancel').skipDirtyForm();
