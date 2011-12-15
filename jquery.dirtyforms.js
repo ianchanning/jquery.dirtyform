@@ -6,13 +6,21 @@ if (typeof jQuery == 'undefined') throw("jQuery Required");
     var skipNextCheck = false;
 
     var defaultOptions = {
-        dirtyMessage: 'You have unsaved changes on this page are you sure you wish to navigate away?'
+        dirtyMessage: 'You have unsaved changes on this page are you sure you wish to navigate away?',
+        not : null,
     };
 
     $.dirtyForm = function(elm, option) {
         if (!handlerSet) {
             handlerSet = true;
+            var oldumload = window.onbeforeunload;
             window.onbeforeunload = function() {
+                if(oldumload)
+                {
+                    var ret = oldumload();
+                    if (ret)
+                        return ret;
+                }
                 if(!skipNextCheck)
                 {
                     var msg = $('body').dirtyMessage();
@@ -26,21 +34,23 @@ if (typeof jQuery == 'undefined') throw("jQuery Required");
         }
 
         var self = this;
-        this.element = $(elm);
         this.options = $.extend({}, defaultOptions, option);
+        
+        this.element = $(elm).not(this.options.not);
+        if (this.element.length > 0)
+        {
+            this.initialVal = getValue(this.element);
 
-        this.initialVal = getValue(this.element);
+            this.element.data('dirtyFormObject', self);
 
-        this.element.data('dirtyFormObject', self);
+            this.isDirty = function() {
+                return (self.initialVal !== getValue(self.element));
+            };
 
-        this.isDirty = function() {
-            return (self.initialVal !== getValue(self.element));
-        };
-
-        this.markClean = function() {
-            self.initialVal = getValue(self.element);
-        };
-
+            this.markClean = function() {
+                self.initialVal = getValue(self.element);
+            };
+        }
     };
 
 
@@ -61,7 +71,7 @@ if (typeof jQuery == 'undefined') throw("jQuery Required");
         return elmValue;
     };
 
-    var inputElements = 'input[type=hidden],input[type=text],input[type=password],input[type=checkbox],input[type=radio],select,textarea';
+    var inputElements = 'input[type=hidden],input[type=text],input[type=date],input[type=number],input[type=password],input[type=checkbox],input[type=radio],select,textarea';
 
 
     $.fn.skipDirtyForm = function() 
@@ -97,13 +107,32 @@ if (typeof jQuery == 'undefined') throw("jQuery Required");
 
             if (self.is(inputElements)) {
                 var df = self.data('dirtyFormObject');
-
                 if (df) {
                     df.markClean();
                 }
             }
             else {
                 $(inputElements, self).markClean();
+            }
+
+        });
+
+        return this;
+    };
+
+    $.fn.notDirtyForm = function() {
+        this.each(function() {
+
+            var self = $(this);
+
+            if (self.is(inputElements)) {
+                var df = self.data('dirtyFormObject');
+                if (df) {
+                    self.removeData('dirtyFormObject');
+                }
+            }
+            else {
+                $(inputElements, self).notDirtyForm();
             }
 
         });
@@ -135,6 +164,30 @@ if (typeof jQuery == 'undefined') throw("jQuery Required");
         });
 
         return isDirty;
+    }; 
+    $.fn.getDirty = function() {
+        var isDirty = false;
+        var dirty = [];
+        this.each(function() {
+            var self = $(this);
+            if (self.is(inputElements)) {
+                var df = self.data('dirtyFormObject');
+                if (df) {
+                    if (df.isDirty()) {
+                        dirty.push(this)
+                    }
+                }
+            }
+            else {                
+                var toadd = $(inputElements, self).getDirty();
+                for(var i =0;i<toadd.length;i++)
+                {
+                    dirty.push(toadd[i]);
+                }
+            }
+        });
+
+        return dirty;
     };
 
     $.fn.dirtyMessage = function() {
