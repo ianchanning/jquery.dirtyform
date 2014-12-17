@@ -91,7 +91,7 @@ if (typeof jQuery == 'undefined') throw("jQuery Required");
                 new $.dirtyForm(self, opts);
             }
             else {
-                $(inputElements, self).dirtyForm();
+                $(inputElements, self).dirtyForm(opts);
             }
 
 
